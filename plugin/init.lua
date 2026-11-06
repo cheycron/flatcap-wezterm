@@ -51,7 +51,7 @@ M.schemes = {
       background = '#20252B',
       inactive_tab_edge = '#3D4652',
       active_tab = {
-        bg_color = '#191D22',
+        bg_color = '#263E53',
         fg_color = '#D5DBE3',
         intensity = 'Bold',
       },
@@ -99,7 +99,7 @@ M.schemes = {
       background = '#FAFBFC',
       inactive_tab_edge = '#D2D9E0',
       active_tab = {
-        bg_color = '#F3F5F7',
+        bg_color = '#DCE9F4',
         fg_color = '#28313B',
         intensity = 'Bold',
       },
@@ -221,6 +221,17 @@ function M.apply_to_config(config, opts)
   end
   config.color_schemes = schemes
   config.color_scheme = M.names[mode]
+
+  -- The fancy tab bar reads config.colors.tab_bar directly and ignores the tab_bar of the
+  -- selected scheme (WezTerm 20240203), so the tab colors are copied there. Only tab_bar is
+  -- written: every other color still comes from the scheme.
+  local colors = config.colors or {}
+  local tab_bar = colors.tab_bar or {}
+  for k, v in pairs(M.schemes[mode].tab_bar) do
+    tab_bar[k] = copy(v)
+  end
+  colors.tab_bar = tab_bar
+  config.colors = colors
 
   -- Merge into window_frame instead of replacing it, so the user's own keys survive.
   local frame = config.window_frame or {}

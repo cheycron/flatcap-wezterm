@@ -26,7 +26,11 @@ import re
 import shutil
 import subprocess
 import sys
-import tomllib
+
+try:  # Python 3.11+; on 3.10 the TOML re-parse check is skipped
+    import tomllib
+except ModuleNotFoundError:  # pragma: no cover
+    tomllib = None
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -114,7 +118,7 @@ NEUTRAL_BLOCKS = ("black", "brightWhite")  # used as backgrounds, not for readin
 TAB_BAR = [
     ("", "background", "bg.surface", "Retro tab bar strip. The fancy tab bar takes window_frame.*_titlebar_bg instead."),
     ("", "inactive_tab_edge", "border.subtle", "Divider between inactive tabs (decorative)."),
-    ("active_tab", "bg_color", "bg.canvas", "Active tab joins the pane it controls."),
+    ("active_tab", "bg_color", "bg.selected", "Current tab: the selected-state fill (the fancy tab bar cannot add a second indicator)."),
     ("active_tab", "fg_color", "text.primary", ""),
     ("inactive_tab", "bg_color", "bg.surface", "Inactive tabs sit on the tab bar."),
     ("inactive_tab", "fg_color", "text.secondary", ""),
@@ -513,6 +517,17 @@ function M.apply_to_config(config, opts)
   config.color_schemes = schemes
   config.color_scheme = M.names[mode]
 
+  -- The fancy tab bar reads config.colors.tab_bar directly and ignores the tab_bar of the
+  -- selected scheme (WezTerm 20240203), so the tab colors are copied there. Only tab_bar is
+  -- written: every other color still comes from the scheme.
+  local colors = config.colors or {}
+  local tab_bar = colors.tab_bar or {}
+  for k, v in pairs(M.schemes[mode].tab_bar) do
+    tab_bar[k] = copy(v)
+  end
+  colors.tab_bar = tab_bar
+  config.colors = colors
+
   -- Merge into window_frame instead of replacing it, so the user's own keys survive.
   local frame = config.window_frame or {}
   for k, v in pairs(M.window_frame[mode]) do
@@ -678,6 +693,8 @@ def render_blocks(path: Path, blocks: dict, theme: dict) -> str:
 def check_toml(outputs: dict[Path, str], theme: dict) -> list[str]:
     """Parse each generated TOML and compare it with the model it came from."""
     errs = []
+    if tomllib is None:
+        return errs
     for mode in MODES:
         path = ROOT / "colors" / f"{SCHEME_NAME[mode]}.toml"
         try:

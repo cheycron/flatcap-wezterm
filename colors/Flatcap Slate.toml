@@ -27,7 +27,7 @@ background = "#20252B"
 inactive_tab_edge = "#3D4652"
 
 [colors.tab_bar.active_tab]
-bg_color = "#191D22"
+bg_color = "#263E53"
 fg_color = "#D5DBE3"
 intensity = "Bold"
 
