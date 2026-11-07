@@ -124,7 +124,7 @@ Use the exact installed family name. Cascadia Code NF (from the Cascadia release
 Measured on the generated values: default text on the background is 12.2:1 in Slate and 12.1:1 in Daylight (target 7:1). Every ANSI color used as text is at least 5.7:1 on the background (lowest: 7.91:1 Slate, 5.66:1 Daylight; target 5:1). Selected text uses the `selection.fg` / `selection.bg` pair (5.6:1 Slate, 9.5:1 Daylight).
 <!-- /build:a11y -->
 
-`python3 scripts/build.py --check` fails if a generated file is stale or any of these targets is missed.
+The targets are the contracts of the [Flatcap core](https://github.com/cheycron/flatcap-theme), and `python3 scripts/build.py --check` fails if a generated file is stale or any of these targets is missed.
 
 Limits that affect you:
 
